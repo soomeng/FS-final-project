@@ -2,7 +2,7 @@
 
 This is my final project.
 
-분석을 위해 필요한 패키지를 불러오고, "게임엔터테인먼트" 업종별로 분석에 필요한 데이터를 체크해주기 위해 doker를 사용합니다.
+분석을 위해 필요한 패키지를 불러오고, "게임엔터테인먼트" 업종별로 분석에 필요한 데이터를 체크해주기 위해 doker를 사용.
 
 ```{r setup, include = FALSE}
 library(rvest)
@@ -38,4 +38,12 @@ remDr$screenshot(display=TRUE)
 element <- remDr$findElement(using="css", "div.item_btn > a")
 element$clickElement()
 html <- read_html(remDr$getPageSource()[[1]])
+```
+
+html을 이용해 원하는 테이블 추출.
+```{r}
+table <- html %>% 
+  html_table() %>% 
+  .[[3]]
+table
 ```
