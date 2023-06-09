@@ -4,7 +4,7 @@ This is my final project.
 
 분석을 위해 필요한 패키지를 불러오고, "게임엔터테인먼트" 업종별로 분석에 필요한 데이터를 체크해주기 위해 doker를 사용.
 
-```{r setup, include = FALSE}
+```{r}
 library(rvest)
 library(dplyr)
 library(RSelenium)

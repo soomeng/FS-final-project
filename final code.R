@@ -35,6 +35,7 @@ html <- read_html(remDr$getPageSource()[[1]])
 table <- html %>% 
   html_table() %>% 
   .[[3]]
+table
 
 # PER 데이터 스크래핑
 per <- table[[10]] %>% 
@@ -42,6 +43,7 @@ per <- table[[10]] %>%
 
 # 해당 산업의 평균 PER
 industry_avg_per <- mean(per)
+industry_avg_per
 ## 24.7
 
 # 종목명 스크래핑
@@ -55,6 +57,7 @@ market_cap <- table[[8]] %>%
   as.numeric()
 
 max_cap_index <- which.max(market_cap)
+max_cap_index
 ## 1
 
 # 시가총액 큰 기업
