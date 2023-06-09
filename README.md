@@ -78,7 +78,7 @@ industry_avg_per <- mean(per)
 max_cap_index <- which.max(market_cap)
 ## 1
 
-# 시가총액 가장 큰 종목 확인인
+# 시가총액 가장 큰 종목 확인
 name[max_cap_index]
 ## 크래프톤
 
