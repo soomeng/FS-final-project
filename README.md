@@ -40,10 +40,32 @@ element$clickElement()
 html <- read_html(remDr$getPageSource()[[1]])
 ```
 
-html을 이용해 원하는 테이블 추출.
+html을 이용해 원하는 테이블을 추출하고, 필요한 데이터인 종목명, 시가총액, PER 데이터를 스크래핑 .
 ```{r}
 table <- html %>% 
   html_table() %>% 
   .[[3]]
-table
+
+# 종목명
+name <- table[[1]] %>% 
+  .[nchar(.) > 0]
+  
+# 시가총액
+market_cap <- table[[8]] %>% 
+  .[nchar(.) > 0] %>% 
+  gsub(",", "", .)  %>%
+  as.numeric()
+  
+# PER
+per <- table[[10]] %>% 
+  .[!is.na(.)]
+```
+
+PER을 이용해 해당 종목이 저평가 또는 고평가 되어있는지 분석. 
+업종 평균 PER 대비 해당 종목의 PER 비율을 구하기 위해 업종 전체 PER의 평균 계산.
+``` {r}
+# 업종 전체의 평균 PER
+industry_avg_per <- mean(per)
+industry_avg_per
+## 24.7
 ```
