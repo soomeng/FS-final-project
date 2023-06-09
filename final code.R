@@ -37,24 +37,24 @@ table <- html %>%
   .[[3]]
 table
 
-# PER 데이터 스크래핑
-per <- table[[10]] %>% 
-  .[!is.na(.)]
-
-# 해당 산업의 평균 PER
-industry_avg_per <- mean(per)
-industry_avg_per
-## 24.7
-
-# 종목명 스크래핑
+# 종목명
 name <- table[[1]] %>% 
   .[nchar(.) > 0]
 
-# 시가총액 데이터 스크래핑
+# 시가총액
 market_cap <- table[[8]] %>% 
   .[nchar(.) > 0] %>% 
   gsub(",", "", .)  %>%
   as.numeric()
+
+# PER
+per <- table[[10]] %>% 
+  .[!is.na(.)]
+
+# 업종 전체의 평균 PER
+industry_avg_per <- mean(per)
+industry_avg_per
+## 24.7
 
 max_cap_index <- which.max(market_cap)
 max_cap_index
