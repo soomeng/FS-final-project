@@ -93,40 +93,19 @@ ggplot(per_data, aes(x = Name, y = PER)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
-# per가 가장 높은 액토즈소프트 데이터 이용
-max_per_index <- which.max(per)
-name[max_per_index]
-high_per <- per[max_per_index]
+# 전체 종목에 대한 PER 비율 계산
+per_ratio <- per / industry_avg_per
 
-data_ <- data.frame(Company = name[max_per_index] , PER = high_per, AVG_PER = industry_avg_per)
-data_ <- data_ %>% mutate(PER_Ratio = PER / AVG_PER)
-data_
-##          Company    PER AVG_PER PER_Ratio
-## 1 액토즈소프트 * 324.29    24.7  13.12915
+# 종목명과 per_ratio 데이터 프레임 생성
+data <- data.frame(name, per_ratio)
 
+# 고평가, 저평가, 음수 레이블 생성
+data$valuation <- ifelse(data$per_ratio > 1, "고평가", 
+                         ifelse(data$per_ratio < 0, "-", "저평가"))
 
-
-# 이상치 데이터의 위치 찾기
-Q1 <- quantile(per, 0.25)
-Q3 <- quantile(per, 0.75)
-IQR <- Q3 - Q1
-
-lower_bound <- Q1 - 1.5 * IQR
-upper_bound <- Q3 + 1.5 * IQR
-
-# 이상치 데이터의 위치 찾기
-outlier_indices <- which(per < lower_bound | per > upper_bound)
-outlier_indices
-
-# 이상치 제거
-per_no_outliers <- per[-outlier_indices]
-cap_no_outliers <- market_cap[-outlier_indices]
-
-per_cap_data_ <- data.frame(PER = per_no_outliers, Market_Cap = cap_no_outliers)
-
-ggplot(per_cap_data_, aes(x = Market_Cap, y = PER)) +
-  geom_point(color = "blue") +
-  labs(title = "시가총액과 PER의 상관관계(이상치 제거)", x = "시가총액", y = "PER")
-
-cor(per_no_outliers, cap_no_outliers)
-## 0.1524286
+# 그래프 그리기
+ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
+  geom_bar(stat = "identity", color = "black") +
+  scale_fill_manual(values = c("black", "blue", "red")) +
+  labs(title = "주식 가치평가", x = "종목명", y = "PER 비율") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
