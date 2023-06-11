@@ -131,7 +131,7 @@ data
 데이터 분석 결과를 시각화 하기 위해 PER과 시가총액의 관계를 나타내는 산점도를 그림
 위의 산점도를 통해해 얻을 수 있는 결과는 시가총액이 증가함에 따라 PER가  감소하는 경향을 확인
 
-``` {r set up}
+``` {r set up, include=true}
 # PER과 시가총액의 상관관계 분석
 per_cap_data <- data.frame(PER = per, Market_Cap = market_cap)
 
