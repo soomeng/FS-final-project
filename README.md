@@ -1,31 +1,10 @@
-# FS-final-project
-
-
->PER 값만을 보고 PER이 큰지 작은지 판단할 수 없다 생각이 되어 해당 업종 평균 PER을 비교하여 업종 평균 대비 PER이 큰지 작은지 분석
-이 분석을 통해 해당 종목이 고평가 되어있는지 저평가 되어있는지 확인
-
 ---
-* PER
-```
-주가수익비율로 기업 이익에 비해 주가가 어느 정도 수준인지 나타낸 비율
-
-주가 / 주당 순이익(EPS) 로 계산하며 1주당 수익의 몇 배가 되는지 나타냄
-
-* EPS = 당기 순이익 / 발행된 주식 수
-```
-
-* 시가총액
-```
-발행주식수와 주가를 곱하여 계산
-
-상장주식을 시가로 평가한 것으로 회사의 규모를 평가할 때 사용
-```
+title: "FS-final-project"
+date: 2023-06-11
+output: html_document
 ---
 
-
-분석을 위해 필요한 패키지를 불러오고, "게임엔터테인먼트" 업종별로 분석에 필요한 데이터를 체크해주기 위해 doker를 사용
-
-```{r}
+```{r setup}
 library(rvest)
 library(dplyr)
 library(RSelenium)
@@ -61,9 +40,7 @@ element$clickElement()
 html <- read_html(remDr$getPageSource()[[1]])
 ```
 
-html을 이용해 원하는 테이블을 추출하고, 필요한 데이터인 종목명, 시가총액, PER 데이터를 스크래핑
-
-```{r}
+```{r setup}
 table <- html %>% 
   html_table() %>% 
   .[[3]]
@@ -83,20 +60,14 @@ per <- table[[10]] %>%
   .[!is.na(.)]
 ```
 
-* PER을 이용한 종목 분석석
-
-업종 평균 PER 대비 해당 종목의 PER 비율을 구하기 위해 업종 전체 PER의 평균을 계산
-
-``` {r setup}
+```{r setup}
 # 업종 전체의 평균 PER
 industry_avg_per <- mean(per)
 industry_avg_per
 ## 24.7
 ```
 
-비교데이터는 시가총액이 가장 큰 종목을 선택 (주가가 큰 기업이 고평가 되어있다고 가정하여 분석 하기 위해 시가총액이 가장 큰 종목을 선택)
-
-``` {r}
+```{r}
 # 시가총액 가장 큰 종목 위치
 max_cap_index <- which.max(market_cap)
 ## 1
@@ -108,13 +79,8 @@ name[max_cap_index]
 # 시가총액 가장 큰 종목의 PER
 high_cap_per <- per[max_cap_index] 
 ```
-* PER 비율 = 종목의 PER / 해당 업종 평균 PER
 
-시가총액이 가장 큰 종목의 PER 비율 계산을 통한 종목 평가
-
-PER 비율이 0.759919로 1보다 작은 값으로, '크래프톤' 종목의 주가는 업종 평균에 비해 비교적 저평가되어 있는 것으로 볼 수 있음
-
-``` {r setup}
+```{r setup}
 # 데이터 분석
 data <- data.frame(Company = name[max_cap_index] , PER = high_cap_per, AVG_PER = industry_avg_per)
 data <- data %>% mutate(PER_Ratio = PER / AVG_PER)
@@ -123,14 +89,7 @@ data
 ## 1 크래프톤 18.77    24.7  0.759919
 ```
 
-* PER과 시가총액의 상관관계 분석
-
-상관계수가 -0.1070046로 매우 약한 음의 상관관계를 가진다는 것을 알 수 있음 (상관계수의 값이 0에 가까울수록 두 변수 간의 선형관계가가 약함)
-
-데이터 분석 결과를 시각화 하기 위해 PER과 시가총액의 관계를 나타내는 산점도를 그림
-위의 산점도를 통해해 얻을 수 있는 결과는 시가총액이 증가함에 따라 PER가  감소하는 경향을 확인
-
-``` {r setup}
+```{r setup}
 # PER과 시가총액의 상관관계 분석
 per_cap_data <- data.frame(PER = per, Market_Cap = market_cap)
 
@@ -141,28 +100,6 @@ ggplot(per_cap_data, aes(x = Market_Cap, y = PER)) +
 cor(market_cap, per)
 ## -0.1070046
 ```
-
----
-* 분석 결과에 대한 설명
-```
-위에 설명한 PER와 시가총액의 정의를 빌려 설명 할 수 있음음
-
-1) PER의 산정방식에서 EPS를 필연적으로 계산할수 밖에 없는데, EPS라는 개념이 해당 기업의 재무제표상 당기순이익을 기반으로 산정된 수치라는 것
-
-재무제표상 자본 및 부채는 공정가치와 장부가치를 기반으로 작성
-
-2)시가총액은 말그대로 정통한 시장에서의 해당 기업의 객관적인 시장가치성격을 가짐짐
-
-결) 재무제표상 자본총계와 시가총액이 필연적으로 다를 수 밖에 없기에 상관계수가 낮게 나타남
-```
----
-
-
-* 검증
-
-시가총액이 아닌 PER값이 가장 큰 종목을 이용해  
-
-이 그래프를 통해 '액토즈소프트' 종목이 가장 높은 PER을 가지는 것을 확인.
 
 ```{r setup}
 # per 값 시각화
@@ -191,9 +128,7 @@ ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   geom_hline(yintercept = 1, color = "gray50")
 ```
 
-
-# 해당 통계 분석의 신뢰성 검증을 위해 반도체 업종의 데이터를 이용해 동일한 분석을 행하여 동일하게 상관관계가 매우 낮음을 확인했다.
-``` {r setup}
+```{r setup}
 url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
 
 remDr$navigate(url)
