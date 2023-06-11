@@ -181,7 +181,7 @@ PER이 음수인 값을 가지는 것은 주당순이익이 마이너스인 경�
 
 이런 투자에서 오는 PER 마이너스가 있기 때문에 PER이 마이너스라고 해서 해당 종목이 좋다, 나쁘다 해석할 수 없음
 
-주당순이익이 일시적인 마이너스 값인 경우 어느 정도 하학 후 기대감으로 인해 주가가 강하게 상승하는 경우도 존재
+주당순이익이 일시적인 마이너스 값인 경우 어느 정도 하락 후 기대감으로 인해 주가가 강하게 상승하는 경우도 존재
 
 ```{r}
 # 전체 종목에 대한 PER 비율 계산
@@ -204,7 +204,9 @@ ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
 
 ![종목 가치평가](https://github.com/soomeng/FS-final-project/assets/127038026/556220fc-ad30-4c32-89ce-11c26781ce67)
 
-해당 통계 분석의 신뢰성 검증을 위해 반도체 업종의 데이터를 이용해 동일한 분석을 행하여 동일하게 상관관계가 매우 낮음을 확인
+
+
+다른 업종 데이터를 이용해 PER과 시가총액의 상관관계가 낮음을 확인
 ``` {r setup}
 url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
 
