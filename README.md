@@ -141,8 +141,7 @@ ggplot(per_cap_data, aes(x = Market_Cap, y = PER)) +
 cor(market_cap, per)
 ## -0.1070046
 ```
-![시가총액과 PER의 상관관계](https://drive.google.com/file/d/11cQpbfRdECBTyVg4lx0P5keXhFlK9Owh/view?usp=drive_link)
-
+![시가총액과 PER의 상관관계](https://github.com/soomeng/FS-final-project/assets/127038026/31674058-fd38-43e7-8674-fb3102eac818)
 ---
 * 분석 결과에 대한 설명
 ```
