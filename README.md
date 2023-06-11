@@ -216,4 +216,53 @@ cor(per_no_outliers, cap_no_outliers)
 ```
 
 
-# 해당 통계 분석의 신뢰성 검증을 위해 반도체 업종의 데이터를 이용해 동일한 분석을 행한 
+# 해당 통계 분석의 신뢰성 검증을 위해 반도체 업종의 데이터를 이용해 동일한 분석을 행하여 동일하게 상관관계가 매우 낮음을 확인했다.
+``` {r}
+url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
+
+remDr$navigate(url)
+remDr$screenshot(display=TRUE)
+
+webElem <- remDr$findElements(using="css", "input[checked]")
+for(i in 1:length(webElem)) webElem[[i]]$clickElement()
+
+option <- paste("#option", 1:27, sep="")
+
+for(i in 1:6){
+  webElem <- remDr$findElement(using="css", option[i])
+  webElem$clickElement()
+}
+
+remDr$screenshot(display=TRUE)
+
+element <- remDr$findElement(using="css", "div.item_btn > a")
+element$clickElement()
+html <- read_html(remDr$getPageSource()[[1]])
+
+table <- html %>% 
+  html_table() %>% 
+  .[[3]]
+
+# PER 데이터 스크래핑
+n <- length(table[[10]])
+per <- table[[10]] %>% 
+  gsub(",", "", .)  %>%
+  .[-c(1,n-1,n)] %>% 
+  as.numeric()
+
+# per 벡터에서 NA의 위치 찾기
+na_indices <- which(is.na(per))
+
+per <- per[-na_indices]
+
+# 시가총액 데이터 스크래핑
+market_cap <- table[[8]] %>% 
+  .[nchar(.) > 0] %>% 
+  gsub(",", "", .)  %>%
+  as.numeric()
+
+market_cap <- market_cap[-na_indices]
+
+cor(market_cap, per)
+## 0.00692
+```
