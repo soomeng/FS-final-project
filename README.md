@@ -142,6 +142,7 @@ cor(market_cap, per)
 ## -0.1070046
 ```
 ![시가총액과 PER의 상관관계](https://github.com/soomeng/FS-final-project/assets/127038026/31674058-fd38-43e7-8674-fb3102eac818)
+
 ---
 * 분석 결과에 대한 설명
 ```
@@ -168,7 +169,10 @@ ggplot(per_data, aes(x = Name, y = PER)) +
   geom_bar(stat = "identity", fill = "lightblue", color = "black") +
   labs(title = "기업별 주가 수익비율", x = "종목명", y = "PER") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+![종목별 PER](https://github.com/soomeng/FS-final-project/assets/127038026/942016a3-d621-4fc7-a677-15c256b187ca)
 
+```{r}
 # 전체 종목에 대한 PER 비율 계산
 per_ratio <- per / industry_avg_per
 
@@ -186,7 +190,7 @@ ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_hline(yintercept = 1, color = "gray50")
 ```
-
+![종목 가치평가](https://github.com/soomeng/FS-final-project/assets/127038026/556220fc-ad30-4c32-89ce-11c26781ce67)
 
 해당 통계 분석의 신뢰성 검증을 위해 반도체 업종의 데이터를 이용해 동일한 분석을 행하여 동일하게 상관관계가 매우 낮음을 확인
 ``` {r setup}
