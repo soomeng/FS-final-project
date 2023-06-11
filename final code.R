@@ -89,7 +89,7 @@ per_data <- data.frame(Name = name, PER = per)
 
 ggplot(per_data, aes(x = Name, y = PER)) +
   geom_bar(stat = "identity", fill = "lightblue", color = "black") +
-  labs(title = "기업별 PER", x = "종목명", y = "PER") +
+  labs(title = "종목별 PER", x = "종목명", y = "PER") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 
@@ -107,7 +107,7 @@ data$valuation <- ifelse(data$per_ratio > 1, "고평가",
 ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   geom_bar(stat = "identity", color = "black") +
   scale_fill_manual(values = c("black", "blue", "red")) +
-  labs(title = "주식 가치평가", x = "종목명", y = "PER 비율") +
+  labs(title = "종목 가치평가", x = "종목명", y = "PER 비율") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   geom_hline(yintercept = 1, color = "gray50")
 
