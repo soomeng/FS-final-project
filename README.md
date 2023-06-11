@@ -87,15 +87,14 @@ per <- table[[10]] %>%
 
 업종 평균 PER 대비 해당 종목의 PER 비율을 구하기 위해 업종 전체 PER의 평균을 계산
 
-``` {r}
+``` {r setup}
 # 업종 전체의 평균 PER
 industry_avg_per <- mean(per)
+industry_avg_per
 ## 24.7
 ```
 
-비교데이터는 시가총액이 가장 큰 종목을 선택
-
-주가가 큰 기업이 고평가 되어있다고 가정하여 분석 하기 위해 시가총액이 가장 큰 종목을 선택
+비교데이터는 시가총액이 가장 큰 종목을 선택 (주가가 큰 기업이 고평가 되어있다고 가정하여 분석 하기 위해 시가총액이 가장 큰 종목을 선택)
 
 ``` {r}
 # 시가총액 가장 큰 종목 위치
@@ -115,7 +114,7 @@ high_cap_per <- per[max_cap_index]
 
 PER 비율이 0.759919로 1보다 작은 값으로, '크래프톤' 종목의 주가는 업종 평균에 비해 비교적 저평가되어 있는 것으로 볼 수 있음
 
-``` {r}
+``` {r setup}
 # 데이터 분석
 data <- data.frame(Company = name[max_cap_index] , PER = high_cap_per, AVG_PER = industry_avg_per)
 data <- data %>% mutate(PER_Ratio = PER / AVG_PER)
@@ -131,7 +130,7 @@ data
 데이터 분석 결과를 시각화 하기 위해 PER과 시가총액의 관계를 나타내는 산점도를 그림
 위의 산점도를 통해해 얻을 수 있는 결과는 시가총액이 증가함에 따라 PER가  감소하는 경향을 확인
 
-``` {r set up, include=true}
+``` {r setup}
 # PER과 시가총액의 상관관계 분석
 per_cap_data <- data.frame(PER = per, Market_Cap = market_cap)
 
@@ -165,7 +164,7 @@ cor(market_cap, per)
 
 이 그래프를 통해 '액토즈소프트' 종목이 가장 높은 PER을 가지는 것을 확인.
 
-```{r}
+```{r setup}
 # per 값 시각화
 per_data <- data.frame(Name = name, PER = per)
 
@@ -173,9 +172,7 @@ ggplot(per_data, aes(x = Name, y = PER)) +
   geom_bar(stat = "identity", fill = "lightblue", color = "black") +
   labs(title = "기업별 주가 수익비율", x = "종목명", y = "PER") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
 
-```{r}
 # 전체 종목에 대한 PER 비율 계산
 per_ratio <- per / industry_avg_per
 
@@ -188,14 +185,15 @@ data$valuation <- ifelse(data$per_ratio > 1, "고평가", "저평가")
 # 그래프 그리기
 ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   geom_bar(stat = "identity", color = "black") +
-  scale_fill_manual(values = c("blue", "red")) +
+  scale_fill_manual(values = c("black", "blue", "red")) +
   labs(title = "주식 가치평가", x = "종목명", y = "PER 비율") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 1, color = "gray50")
 ```
 
 
 # 해당 통계 분석의 신뢰성 검증을 위해 반도체 업종의 데이터를 이용해 동일한 분석을 행하여 동일하게 상관관계가 매우 낮음을 확인했다.
-``` {r}
+``` {r setup}
 url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
 
 remDr$navigate(url)

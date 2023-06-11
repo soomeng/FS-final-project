@@ -108,4 +108,54 @@ ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   geom_bar(stat = "identity", color = "black") +
   scale_fill_manual(values = c("black", "blue", "red")) +
   labs(title = "주식 가치평가", x = "종목명", y = "PER 비율") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_hline(yintercept = 1, color = "gray50")
+
+
+# ---반도체---------------------------------------------------
+url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
+
+remDr$navigate(url)
+remDr$screenshot(display=TRUE)
+
+webElem <- remDr$findElements(using="css", "input[checked]")
+for(i in 1:length(webElem)) webElem[[i]]$clickElement()
+
+option <- paste("#option", 1:27, sep="")
+
+for(i in 1:6){
+  webElem <- remDr$findElement(using="css", option[i])
+  webElem$clickElement()
+}
+
+remDr$screenshot(display=TRUE)
+
+element <- remDr$findElement(using="css", "div.item_btn > a")
+element$clickElement()
+html <- read_html(remDr$getPageSource()[[1]])
+
+table <- html %>% 
+  html_table() %>% 
+  .[[3]]
+
+# PER 데이터 스크래핑
+n <- length(table[[10]])
+per <- table[[10]] %>% 
+  gsub(",", "", .)  %>%
+  .[-c(1,n-1,n)] %>% 
+  as.numeric()
+
+# per 벡터에서 NA의 위치 찾기
+na_indices <- which(is.na(per))
+
+per <- per[-na_indices]
+
+# 시가총액 데이터 스크래핑
+market_cap <- table[[8]] %>% 
+  .[nchar(.) > 0] %>% 
+  gsub(",", "", .)  %>%
+  as.numeric()
+
+market_cap <- market_cap[-na_indices]
+
+cor(market_cap, per)
