@@ -1,10 +1,20 @@
 # FS-final project
 
-PER 값만을 보고 PER이 큰지 작은지 판단할 수 없다 생각이 되어 해당 업종 평균 PER을 비교하여 업종 평균 대비 PER이 큰지 작은지 분석
-이 분석을 통해 해당 종목이 고평가 되어있는지 저평가 되어있는지 확인
+
+## 목차
+1. 프로젝트 소개
+2. 용어 소개
+3. 데이터 분석
 
 
----
+### 프로젝트 소개
+주제 선정 동기:
+
+네이버 증권 페이지를 공부하며 기업가치를 나타내는 다양한 값들을 알게 되었고, 그 값을 통해 기업의 가치 판단이 이루어진다는 사실을 알게 되었다. 그러던 중 PER 값만을 보고 PER의 상대적 가치를 판단할 수 없다 생각이 되어 해당 업종 평균 PER을 기준으로 비교하여 업종 평균 PER 대비 해당 값이 큰지 작은지 비교하여 특정 기업의 가치가 고평가되어 있는지 저평가 되어있는지 분석하였다.
+
+
+### 용어 소개
+
 * PER
 ```
 주가수익비율로 기업 이익에 비해 주가가 어느 정도 수준인지 나타낸 비율
@@ -20,128 +30,55 @@ PER 값만을 보고 PER이 큰지 작은지 판단할 수 없다 생각이 되�
 
 상장주식을 시가로 평가한 것으로 회사의 규모를 평가할 때 사용
 ```
----
+
+### 데이터 분석
+
+[네이버 증권 업종별 페이지]<https://finance.naver.com/sise/sise_group.naver?type=upjong>에서 비교하고자 하는 업종을 선택한다.
+
+'게임엔터테인먼트' 업종을 이용하여 분석하였다.
+
+* 전체 종목의 PER 시각화
+![종목별 PER](https://github.com/soomeng/FS-final-project/assets/127038026/942016a3-d621-4fc7-a677-15c256b187ca)
+
+PER이 음수인 값을 가지는 것은 주당순이익이 마이너스인 경우이다.   
+우리나라 주식들은 대부분 경기변동형 주식으로 구성되어 있어 급격한 경기변동이 오는 경우 PER가 마이너스가 나오는 경우가 종종 있다.   이런 투자에서 오는 PER 마이너스가 있기 때문에 PER이 마이너스라고 해서 해당 종목이 좋다, 나쁘다 해석할 수 없다.   주당순이익이 일시적인 마이너스 값인 경우 어느 정도 하락 후 기대감으로 인해 주가가 강하게 상승하는 경우도 존재
+
+* 특정 종목의 가치 평가
+
+>가정: 주가가 큰 기업이 고평가 되어있을 것으로 가정하였다.   이때 시가총액은 주가와 발행주식수를 곱하여 계산하기 때문에 시가총액이 큰 종목을 선택하여 업종 평균 PER을 비교할 것이다. 
+
+업종 전체 평균 PER과 시가총액이 가장 큰 종목의 PER을 비교 필요한 데이터 항목인 시가총액과 PER를 불러오기 위하여 docker를 사용하였다.
+
+웹스크래핑을 통하여 종목명, 시가총액, PER 데이터를 얻어올 수 있다. 
 
 
-분석을 위해 필요한 패키지를 불러오고, "게임엔터테인먼트" 업종별로 분석에 필요한 데이터를 체크해주기 위해 doker를 사용
+아래에서 PER 비율이라는 용어를 사용할것으로 해당 용어를 정의하자.
 
-```{r}
-library(rvest)
-library(dplyr)
-library(RSelenium)
-library(ggplot2)
+> PER 비율 = 종목의 PER / 해당 업종 평균 PER
 
-remDr <- remoteDriver(
-  remoteServerAddr = 'localhost', 
-  port = 4429, 
-  browserName = 'chrome') 
+* 시가총액이 가장 큰 '크래프톤'을 전체 업종 평균과 비교
 
-remDr$getStatus()
-
-remDr$open()
-
-url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=263"
-
-remDr$navigate(url)
-remDr$screenshot(display=TRUE)
-
-webElem <- remDr$findElements(using="css", "input[checked]")
-for(i in 1:length(webElem)) webElem[[i]]$clickElement()
-
-option <- paste("#option", 1:27, sep="")
-
-for(i in 1:6){
-  webElem <- remDr$findElement(using="css", option[i])
-  webElem$clickElement()
-}
-remDr$screenshot(display=TRUE)
-
-element <- remDr$findElement(using="css", "div.item_btn > a")
-element$clickElement()
-html <- read_html(remDr$getPageSource()[[1]])
-```
-
-html을 이용해 원하는 테이블을 추출하고, 필요한 데이터인 종목명, 시가총액, PER 데이터를 스크래핑
-
-```{r}
-table <- html %>% 
-  html_table() %>% 
-  .[[3]]
-
-# 종목명
-name <- table[[1]] %>% 
-  .[nchar(.) > 0]
-  
-# 시가총액
-market_cap <- table[[8]] %>% 
-  .[nchar(.) > 0] %>% 
-  gsub(",", "", .)  %>%
-  as.numeric()
-  
-# PER
-per <- table[[10]] %>% 
-  .[!is.na(.)]
-```
-
-* PER을 이용한 종목 분석
-
-업종 평균 PER 대비 해당 종목의 PER 비율을 구하기 위해 업종 전체 PER의 평균을 계산
-
-``` {r setup}
-# 업종 전체의 평균 PER
-industry_avg_per <- mean(per)
-industry_avg_per
-## 24.7
-```
-
-비교데이터는 시가총액이 가장 큰 종목을 선택 (주가가 큰 기업이 고평가 되어있다고 가정하여 분석 하기 위해 시가총액이 가장 큰 종목을 선택)
-
-``` {r}
-# 시가총액 가장 큰 종목 위치
-max_cap_index <- which.max(market_cap)
-## 1
-
-# 시가총액 가장 큰 종목 확인
-name[max_cap_index]
-## 크래프톤
-
-# 시가총액 가장 큰 종목의 PER
-high_cap_per <- per[max_cap_index] 
-```
-* PER 비율 = 종목의 PER / 해당 업종 평균 PER
-
-시가총액이 가장 큰 종목의 PER 비율 계산을 통한 종목 평가
+Company | PER   | AVG_PER | PER_Ratio
+크래프톤| 18.77 | 24.7    | 0.759919
 
 PER 비율이 0.759919로 1보다 작은 값으로, '크래프톤' 종목의 주가는 업종 평균에 비해 비교적 저평가되어 있는 것으로 볼 수 있음
 
-``` {r setup}
-# 데이터 분석
-data <- data.frame(Company = name[max_cap_index] , PER = high_cap_per, AVG_PER = industry_avg_per)
-data <- data %>% mutate(PER_Ratio = PER / AVG_PER)
-data
-##    Company   PER AVG_PER PER_Ratio
-## 1 크래프톤 18.77    24.7  0.759919
+```
+의문점?
+
+주가가 높을수록 해당 종목이 고평가 되어있을 것이라 가정하였는데 전혀 반대의 결과를 얻었음
+
+--> 그렇다면 주가나 시가총액이 PER과 관계가 없는 값인가?
 ```
 
 * PER과 시가총액의 상관관계 분석
 
-상관계수가 -0.1070046로 매우 약한 음의 상관관계를 가진다는 것을 알 수 있음 (상관계수의 값이 0에 가까울수록 두 변수 간의 선형관계가가 약함)
-
-데이터 분석 결과를 시각화 하기 위해 PER과 시가총액의 관계를 나타내는 산점도를 그림
-위의 산점도를 통해해 얻을 수 있는 결과는 시가총액이 증가함에 따라 PER가  감소하는 경향을 확인
-
-``` {r setup}
-# PER과 시가총액의 상관관계 분석
-per_cap_data <- data.frame(PER = per, Market_Cap = market_cap)
-
-ggplot(per_cap_data, aes(x = Market_Cap, y = PER)) +
-  geom_point(color = "blue") +
-  labs(title = "시가총액과 PER의 상관관계", x = "시가총액", y = "PER")
-
-cor(market_cap, per)
-## -0.1070046
-```
 ![시가총액과 PER의 상관관계](https://github.com/soomeng/FS-final-project/assets/127038026/31674058-fd38-43e7-8674-fb3102eac818)
+
+산점도를 통해 시가총액이 증가함에 따라 PER가 감소하는 경향을 확인
+
+또한, 상관계수가 -0.1070046로 매우 약한 음의 상관관계를 가진다는 것을 알 수 있음 (상관계수의 값이 0에 가까울수록 두 변수 간의 선형관계가가 약함)
+
 
 ---
 * 분석 결과에 대한 설명
@@ -162,97 +99,9 @@ cor(market_cap, per)
 ---
 
 
-게임엔터테인먼트 업종의 전체 주식 가치평가 시각화
-
-```{r setup}
-# per 값 시각화
-per_data <- data.frame(Name = name, PER = per)
-
-ggplot(per_data, aes(x = Name, y = PER)) +
-  geom_bar(stat = "identity", fill = "lightblue", color = "black") +
-  labs(title = "기업별 주가 수익비율", x = "종목명", y = "PER") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-![종목별 PER](https://github.com/soomeng/FS-final-project/assets/127038026/942016a3-d621-4fc7-a677-15c256b187ca)
-
-PER이 음수인 값을 가지는 것은 주당순이익이 마이너스인 경우임
-
-우리나라 주식들은 대부분 경기변동형 주식으로 구성되어 있어 급격한 경기변동이 오는 경우 PER가 마이너스가 나오는 경우가 종종 있음
-
-이런 투자에서 오는 PER 마이너스가 있기 때문에 PER이 마이너스라고 해서 해당 종목이 좋다, 나쁘다 해석할 수 없음
-
-주당순이익이 일시적인 마이너스 값인 경우 어느 정도 하락 후 기대감으로 인해 주가가 강하게 상승하는 경우도 존재
-
-```{r}
-# 전체 종목에 대한 PER 비율 계산
-per_ratio <- per / industry_avg_per
-
-# 종목명과 per_ratio 데이터 프레임 생성
-data <- data.frame(name, per_ratio)
-
-# 고평가, 저평가 레이블 생성
-data$valuation <- ifelse(data$per_ratio > 1, "고평가", "저평가")
-
-# 그래프 그리기
-ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
-  geom_bar(stat = "identity", color = "black") +
-  scale_fill_manual(values = c("black", "blue", "red")) +
-  labs(title = "주식 가치평가", x = "종목명", y = "PER 비율") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  geom_hline(yintercept = 1, color = "gray50")
-```
+* 게임엔터테인먼트 업종의 전체 주식 가치평가 시각화
 
 ![종목 가치평가](https://github.com/soomeng/FS-final-project/assets/127038026/556220fc-ad30-4c32-89ce-11c26781ce67)
 
 
 
-다른 업종 데이터를 이용해 PER과 시가총액의 상관관계가 낮음을 확인
-``` {r setup}
-url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
-
-remDr$navigate(url)
-remDr$screenshot(display=TRUE)
-
-webElem <- remDr$findElements(using="css", "input[checked]")
-for(i in 1:length(webElem)) webElem[[i]]$clickElement()
-
-option <- paste("#option", 1:27, sep="")
-
-for(i in 1:6){
-  webElem <- remDr$findElement(using="css", option[i])
-  webElem$clickElement()
-}
-
-remDr$screenshot(display=TRUE)
-
-element <- remDr$findElement(using="css", "div.item_btn > a")
-element$clickElement()
-html <- read_html(remDr$getPageSource()[[1]])
-
-table <- html %>% 
-  html_table() %>% 
-  .[[3]]
-
-# PER 데이터 스크래핑
-n <- length(table[[10]])
-per <- table[[10]] %>% 
-  gsub(",", "", .)  %>%
-  .[-c(1,n-1,n)] %>% 
-  as.numeric()
-
-# per 벡터에서 NA의 위치 찾기
-na_indices <- which(is.na(per))
-
-per <- per[-na_indices]
-
-# 시가총액 데이터 스크래핑
-market_cap <- table[[8]] %>% 
-  .[nchar(.) > 0] %>% 
-  gsub(",", "", .)  %>%
-  as.numeric()
-
-market_cap <- market_cap[-na_indices]
-
-cor(market_cap, per)
-## 0.00692
-```
