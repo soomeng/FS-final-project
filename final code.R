@@ -107,7 +107,7 @@ ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   geom_hline(yintercept = 1, color = "gray50")
 
 
-# 크래프톤의 주가변화 확인
+# 고평가된 종목인 액토즈소프트의 주가변화 확인
 library(httr)
 library(dplyr)
 library(stringr)
@@ -142,10 +142,10 @@ siseJson <- function(url){
   print(df)
 }
 
-krafton_url <- "https://api.finance.naver.com/siseJson.naver?symbol=259960&requestType=1&startTime=20230101&endTime=20230531&timeframe=day"
-krafton <- siseJson(krafton_url)
+actoz_url <- "https://api.finance.naver.com/siseJson.naver?symbol=052790&requestType=1&startTime=20230101&endTime=20230531&timeframe=day"
+actoz <- siseJson(actoz_url)
 
-ggplot(krafton, aes(x = 날짜, y = 종가)) +
+ggplot(actoz, aes(x = 날짜, y = 종가)) +
   geom_line() +
   labs(x = "날짜", y = "종가") +
-  ggtitle("Krafton 주가의 변화")
+  ggtitle("액토즈소프트의 주가 변화")
