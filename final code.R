@@ -54,11 +54,9 @@ per <- table[[10]] %>%
 # 업종 전체의 평균 PER
 industry_avg_per <- mean(per)
 industry_avg_per
-## 24.7
 
 # 시가총액 가장 큰 종목 위치
 max_cap_index <- which.max(market_cap)
-## 1
 
 # 시가총액 가장 큰 종목 확인
 name[max_cap_index]
@@ -71,8 +69,6 @@ high_cap_per <- per[max_cap_index]
 data <- data.frame(Company = name[max_cap_index] , PER = high_cap_per, AVG_PER = industry_avg_per)
 data <- data %>% mutate(PER_Ratio = PER / AVG_PER)
 data
-##    Company   PER AVG_PER PER_Ratio
-## 1 크래프톤 18.77    24.7  0.759919
 
 # PER과 시가총액의 상관관계 분석
 per_cap_data <- data.frame(PER = per, Market_Cap = market_cap)
@@ -82,7 +78,6 @@ ggplot(per_cap_data, aes(x = Market_Cap, y = PER)) +
   labs(title = "시가총액과 PER의 상관관계", x = "시가총액", y = "PER")
 
 cor(market_cap, per)
-## -0.1070046
 
 # per 값 시각화
 per_data <- data.frame(Name = name, PER = per)
@@ -112,50 +107,45 @@ ggplot(data, aes(x = name, y = per_ratio, fill = valuation)) +
   geom_hline(yintercept = 1, color = "gray50")
 
 
-# ---반도체---------------------------------------------------
-url <- "https://finance.naver.com/sise/sise_group_detail.naver?type=upjong&no=278"
-
-remDr$navigate(url)
-remDr$screenshot(display=TRUE)
-
-webElem <- remDr$findElements(using="css", "input[checked]")
-for(i in 1:length(webElem)) webElem[[i]]$clickElement()
-
-option <- paste("#option", 1:27, sep="")
-
-for(i in 1:6){
-  webElem <- remDr$findElement(using="css", option[i])
-  webElem$clickElement()
+# 크래프톤의 주가변화 확인
+library(httr)
+library(dplyr)
+library(stringr)
+siseJson <- function(url){
+  # 데이터 가져오기
+  data <- GET(url)
+  
+  # HTML 데이터를 문자열로 변환
+  df <- data %>%
+    read_html() %>%        # HTML 파싱
+    html_text() %>%        # HTML 텍스트 추출
+    read_csv()             # CSV 형식의 데이터로 읽기
+  
+  # 열 이름에서 작은 따옴표와 대괄호 제거
+  names(df) <- str_replace_all(names(df), "['\\[\\]]", "")
+  
+  # 모든 열에서 큰따옴표, 대괄호, 백슬래시 제거
+  df[] <- lapply(df, function(x) str_replace_all(x, '["\\[\\]\\\\]', ""))
+  
+  # 8번째 열 제거
+  df <- df[, -8]
+  
+  # 첫 번째 열을 날짜 데이터로 변환
+  df$날짜 <- as.Date(df$날짜, format = "%Y%m%d")
+  
+  # 마지막 NA 데이터 제거
+  df <- df[1:(nrow(df)-1), ]
+  
+  # 종가, 거래량 데이터를 숫자로 변환
+  df$종가 <- as.numeric(df$종가)
+  df$거래량 <- as.numeric(df$거래량)
+  print(df)
 }
 
-remDr$screenshot(display=TRUE)
+krafton_url <- "https://api.finance.naver.com/siseJson.naver?symbol=259960&requestType=1&startTime=20230101&endTime=20230531&timeframe=day"
+krafton <- siseJson(krafton_url)
 
-element <- remDr$findElement(using="css", "div.item_btn > a")
-element$clickElement()
-html <- read_html(remDr$getPageSource()[[1]])
-
-table <- html %>% 
-  html_table() %>% 
-  .[[3]]
-
-# PER 데이터 스크래핑
-n <- length(table[[10]])
-per <- table[[10]] %>% 
-  gsub(",", "", .)  %>%
-  .[-c(1,n-1,n)] %>% 
-  as.numeric()
-
-# per 벡터에서 NA의 위치 찾기
-na_indices <- which(is.na(per))
-
-per <- per[-na_indices]
-
-# 시가총액 데이터 스크래핑
-market_cap <- table[[8]] %>% 
-  .[nchar(.) > 0] %>% 
-  gsub(",", "", .)  %>%
-  as.numeric()
-
-market_cap <- market_cap[-na_indices]
-
-cor(market_cap, per)
+ggplot(krafton, aes(x = 날짜, y = 종가)) +
+  geom_line() +
+  labs(x = "날짜", y = "종가") +
+  ggtitle("Krafton 주가의 변화")
