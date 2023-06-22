@@ -142,7 +142,7 @@ siseJson <- function(url){
   print(df)
 }
 
-actoz_url <- "https://api.finance.naver.com/siseJson.naver?symbol=052790&requestType=1&startTime=20230101&endTime=20230531&timeframe=day"
+actoz_url <- "https://api.finance.naver.com/siseJson.naver?symbol=052790&requestType=1&startTime=20220531&endTime=20230531&timeframe=day"
 actoz <- siseJson(actoz_url)
 
 ggplot(actoz, aes(x = 날짜, y = 종가)) +
